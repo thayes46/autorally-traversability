@@ -46,6 +46,9 @@ for topic, msg, t in bag.read_messages(topics=['/left_camera/image_raw']):
     markers[unknown == 255] = 0
     # Apply watershed
     markers = cv.watershed(cv_image, markers)
+    # image was read only for some reason
+    cv_image.setflags(write=1)
+
     cv_image[markers == -1] = [255, 0, 0]
     # display image
     cv.imshow("Circles detected", cv_image)
