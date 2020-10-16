@@ -14,7 +14,7 @@ fname = '2020-10-15-11-16-39.bag'
 
 # Open bag
 bag = rosbag.Bag(fpath + fname)
-
+output_image_index = 0
 # Print out topics if needed
 topics = bag.get_type_and_topic_info()[1].keys()
 for topic, msg, t in bag.read_messages(topics=['/left_camera/image_raw']):
@@ -51,6 +51,9 @@ for topic, msg, t in bag.read_messages(topics=['/left_camera/image_raw']):
 
     cv_image[markers == -1] = [255, 0, 0]
     # display image
-    cv.imshow("Circles detected", cv_image)
+    image_file = "" + output_image_index + ".png"
+    output_image_index = output_image_index + 1
+    cv.imwrite(image_file, cv_image)
+
 
 bag.close()
