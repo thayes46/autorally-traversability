@@ -37,6 +37,8 @@ for topic, msg, t in bag.read_messages(topics=['/left_camera/image_raw']):
                                 0)
     # Finding unknown region
     sure_fg = np.uint8(sure_fg)
+    fg_file = str(output_image_index) + "-foreground.png"
+    cv.imwrite(fg_file, sure_fg)
     unknown = cv.subtract(sure_bg, sure_fg)
     # Marker labelling
     ret, markers = cv.connectedComponents(sure_fg)
