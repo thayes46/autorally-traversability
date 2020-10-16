@@ -6,6 +6,8 @@ Dump relevant contents of rosbag file into numpy arrays
 
 import rosbag
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 
