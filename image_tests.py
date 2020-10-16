@@ -51,7 +51,7 @@ for topic, msg, t in bag.read_messages(topics=['/left_camera/image_raw']):
 
     cv_image[markers == -1] = [255, 0, 0]
     # display image
-    image_file = "" + output_image_index + ".png"
+    image_file = "" + str(output_image_index) + ".png"
     print("writing to file: ", image_file)
     output_image_index = output_image_index + 1
     cv.imwrite(image_file, cv_image)
