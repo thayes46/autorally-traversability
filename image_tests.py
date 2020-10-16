@@ -13,6 +13,7 @@ bag = rosbag.Bag(fpath + fname)
 # Print out topics if needed
 topics = bag.get_type_and_topic_info()[1].keys()
 for topic, msg, t in bag.read_messages(topics=['/left_camera/image_raw']):
-    print(msg)
+    print("Height: %s", msg.width)
+    print("Width: %s", msg.height)
 
 bag.close()
