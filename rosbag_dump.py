@@ -9,8 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 
-fpath = '/Users/thomas.king/Downloads/'
-fname = '2020-09-14-14-35-43_0.bag'
+fpath = '~/autorally/'
+fname = '2020-10-15-11-16-39.bag'
 
 # Open bag
 bag = rosbag.Bag(fpath + fname)
