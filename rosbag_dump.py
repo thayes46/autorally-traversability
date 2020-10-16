@@ -23,7 +23,7 @@ topics = bag.get_type_and_topic_info()[1].keys()
 #%% Coord transform between chassis and camera frame
 numsg = 1;
 for topic, msg, t in bag.read_messages(topics=['/tf_static']):
-    # print(msg)
+    print(msg)
     numsg -= 1
     if numsg < 1:
         break
