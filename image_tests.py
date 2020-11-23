@@ -5,7 +5,7 @@ Pull image from rosbag and call processing
 import rosbag
 import numpy as np
 from cv_bridge import CvBridge
-from algos import WaterShedSegmentation
+# from algos import WaterShedSegmentation
 
 bridge = CvBridge()
 import cv2 as cv
@@ -18,6 +18,10 @@ bag = rosbag.Bag(fpath + fname)
 output_image_index = 0
 # Print out topics if needed
 topics = bag.get_type_and_topic_info()[1].keys()
+print(topics)
+for topic, msg, t in bag.read_messages(topics=topics):
+    print(msg)
+"""
 for topic, msg, t in bag.read_messages(topics=['/left_camera/image_color/compressed']):
     # Convert image message to OpenCV format
     cv_image = bridge.compressed_imgmsg_to_cv2(msg)
@@ -31,7 +35,5 @@ for topic, msg, t in bag.read_messages(topics=['/left_camera/image_color/compres
     print("writing to file: ", image_file)
     output_image_index = output_image_index + 1
     cv.imwrite(image_file, result_image)
+"""
 bag.close()
-
-
-
