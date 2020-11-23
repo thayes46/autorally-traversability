@@ -31,19 +31,19 @@ for topic, msg, t in bag.read_messages(topics=['/tf_static']):
     if numsg < 1:
         break
 
-qC = np.array([[msg.transforms[1].transform.translation.x,
-                msg.transforms[1].transform.translation.y,
-                msg.transforms[1].transform.translation.z]])
+    qC = np.array([[msg.transforms[1].transform.translation.x,
+                    msg.transforms[1].transform.translation.y,
+                    msg.transforms[1].transform.translation.z]])
 
-# %% Camera Intrinsic Matrix
-numsg = 1
-for topic, msg, t in bag.read_messages(topics=['/left_camera/camera_info']):
-    numsg -= 1
-    if numsg < 1:
-        break
-K = np.reshape(msg.K, (3, 3))
-height = msg.height
-width = msg.width
+    # %% Camera Intrinsic Matrix
+    numsg = 1
+    for topic, msg, t in bag.read_messages(topics=['/left_camera/camera_info']):
+        numsg -= 1
+        if numsg < 1:
+            break
+    K = np.reshape(msg.K, (3, 3))
+    height = msg.height
+    width = msg.width
 
 # %% Pose Information and Images
 
