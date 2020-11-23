@@ -5,17 +5,22 @@ Dump relevant contents of rosbag file into numpy arrays
 """
 
 import rosbag
+import rospy
 import numpy as np
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from mpl_toolkits import mplot3d
+import cv2 as cv
 
-fpath = '/home/todd/autorally/'
-fname = '2020-10-15-11-16-39.bag'
+
+#fpath = '/Users/thomas.king/Downloads/'
+fpath = '/home/thomas/Downloads/'
+casename = '2020-10-15-11-16-39'
+
+# set up folders before running - casename folder and images subfolder
+outpath = "/home/thomas/Documents/Traversability/" + casename + "/"
+posefile = outpath + "pose.npz"
+camfile = outpath + "cam_info.npz"
 
 # Open bag
-bag = rosbag.Bag(fpath + fname)
+bag = rosbag.Bag(fpath + casename + ".bag")
 
 # Print out topics if needed
 topics = bag.get_type_and_topic_info()[1].keys()
@@ -23,40 +28,71 @@ topics = bag.get_type_and_topic_info()[1].keys()
 #%% Coord transform between chassis and camera frame
 numsg = 1;
 for topic, msg, t in bag.read_messages(topics=['/tf_static']):
-    print(msg)
     numsg -= 1
     if numsg < 1:
         break
     
-T = np.array([[msg.transforms[1].transform.translation.x,
+qC = np.array([[msg.transforms[1].transform.translation.x,
                msg.transforms[1].transform.translation.y,
                msg.transforms[1].transform.translation.z]])
 
 #%% Camera Intrinsic Matrix
 numsg = 1
 for topic, msg, t in bag.read_messages(topics=['/left_camera/camera_info']):
-    # print(msg)
     numsg -= 1
     if numsg < 1:
         break
 K = np.reshape(msg.K,(3,3))
+height = msg.height
+width = msg.width
 
-#%% Vehicle pose in world frame
-x = y = z = time = np.array([])
+#%% Pose Information and Images
 
-for topic, msg, t in bag.read_messages(topics=['/ground_truth//state_raw']):
-    time = np.append(time,msg.header.stamp.to_time())
-    x = np.append(x,msg.pose.pose.position.x)
-    y = np.append(y,msg.pose.pose.position.y)
-    z = np.append(z,msg.pose.pose.position.z)
+state_topics = ["/ground_truth/state"]
+image_topics = ["/left_camera/image_raw"]
 
-# Plot vehicle pose in world frame
-ax = plt.axes(projection='3d')
-ax.plot3D(x,y,z)
-ax.set_xlabel('x')
-ax.set_ylabel('y')
-ax.set_zlabel('z')
-ax.set_title('Vehicle Pose in World Frame')
+t0 = bag.get_start_time()
+tf = bag.get_end_time()
+
+# iterate through bag to get poses
+x = y = z = t1 = t2 =  np.array([])
+quat = np.empty((4,1))
+
+for topic, msg, t in bag.read_messages(start_time=rospy.Time(t0),
+       end_time=rospy.Time(tf),
+       topics=state_topics + image_topics):
+    if topic in state_topics:
+        t2 = np.append(t2,rospy.Time.to_sec(t))
+        x = np.append(x,msg.pose.pose.position.x)
+        y = np.append(y,msg.pose.pose.position.y)
+        z = np.append(z,msg.pose.pose.position.z)
+        new_quat = np.array([[msg.pose.pose.orientation.x],
+                        [msg.pose.pose.orientation.y],
+                        [msg.pose.pose.orientation.z],
+                        [msg.pose.pose.orientation.w]])
+        quat = np.hstack((quat,new_quat))
+    
+    elif topic in image_topics:
+        img = np.frombuffer(msg.data, dtype='uint8').reshape(msg.height, msg.width, 3)
+        tstr = str(rospy.Time.to_sec(t))
+        outfile = outpath + "images/" + tstr + ".png"
+#        cv.imwrite(outfile,cv.cvtColor(img, cv.COLOR_RGB2BGR))
+        cv.imwrite(outfile,img)
+
+quat = np.delete(quat,0,1)
+
+pos = np.vstack((x,y,z))
+
 
 bag.close()
+
+#%% Save output
+
+
+np.savez(posefile, pos=pos, quat=quat, tt = t2)
+np.savez(camfile, K=K, qC=qC, height=height, width = width)
+
+cam_info = {"K":K,"qC":qC,"height":1024,"width":1280}
+
+
 
